@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
+
+contract MRKTPLCE is ERC721 {
+    constructor() ERC721("MyToken", "MTK") {}
+
+    function safeMint(address to, uint256 tokenId) public  {
+        _safeMint(to, tokenId);}
+        
+    address payable public  owner=payable(msg.sender);
+    uint public ListingFee=1 ether;
+    uint public ArtPrice;
+    mapping(uint=>bool)public ApprovedNFT;
+    mapping(address=>uint)public MarketItem;
+     enum NFT{created,released}
+     NFT public cond=NFT.created;
+     
+     function balance(address check)public view returns(uint){
+         return(check.balance);
+     }
+    function approveNFT(uint _id)public{
+       require(!ApprovedNFT[_id],"Given NFT is Approved");
+        ApprovedNFT[_id]=true; 
+    }
+    function Market(uint id,uint price)public payable{
+        uint PayAmount = ListingFee;
+        require(ApprovedNFT[id], "NFT not approved!");
+        require(msg.value >= PayAmount, "Not adequate ethers");
+        payable(owner).transfer(msg.value);
+        MarketItem[msg.sender]=id;
+        ArtPrice=price;
+        }
+    function buy(address  payable add,uint tag)public payable{
+        _burn(tag);
+        require(msg.value >= ArtPrice, "Not adequate ethers");
+         bool sent=add.send(msg.value);
+         require(sent,"transfer failed");
+         _safeMint(msg.sender,tag);
+         ApprovedNFT[tag]=false;
+         cond=NFT.released;
+    }
+}
