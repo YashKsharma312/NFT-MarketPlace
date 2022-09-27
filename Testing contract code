@@ -1,0 +1,49 @@
+const{expect}=require("chai");
+const { BigNumber, utils } = require("ethers");
+describe("Marketplace Contract",function(){
+    let TestContract;
+    let contract;
+    let owner;
+    let addr1;
+    let addr2;
+
+    beforeEach(async function(){
+        TestContract=await ethers.getContractFactory("MRKTPLCE");
+        [owner,addr1,addr2]=await ethers.getSigners();
+        contract=await TestContract.deploy();
+    });
+    describe("Test contract", function () {
+        it("Should set right owner",async function(){
+        expect(await contract.owner()).to.equal(owner.address);})
+        
+        
+        it("Should assign the token to the address",async function(){
+        await contract.safeMint(addr1.address,1);
+        expect(await contract.balanceOf(addr1.address)).to.equal(1);});
+        
+        
+        it("approve the NFTs",async function(){
+        await contract.approveNFT(1);
+        const a=String(await contract.ApprovedNFT(1));
+        expect(a).to.equal("true");})
+        
+        
+        it("Should pay listing fees to owner after adding item to market",async function(){
+        await contract.safeMint(addr1.address,1);
+        await contract.approveNFT(1);
+        await contract.connect(addr1).Market(1,2,{value:ethers.utils.parseEther("1")});
+        expect(await contract.balance(owner.address)).to.greaterThan(BigInt(10000000000000000000000));});
+        
+        
+        it("supply amount to seller and nft to buyer",async function(){
+        await contract.safeMint(addr1.address,1);
+        await contract.approveNFT(1);
+        await contract.connect(addr1).Market(1,5,{value:ethers.utils.parseEther("1")});
+        await contract.connect(addr2).buy(addr1.address,1,{value:ethers.utils.parseEther("5")});
+        expect(await contract.balance(owner.address)).to.greaterThan(BigInt(10000000000000000000000));
+        expect(await contract.balance(addr1.address)).to.greaterThan(BigInt(10000000000000000000000));
+        expect(await contract.balance(addr2.address)).to.lessThan(BigInt(10000000000000000000000));
+        expect(await contract.balanceOf(addr1.address)).to.equal(0);
+        expect(await contract.balanceOf(addr2.address)).to.equal(1);
+        })
+})})
