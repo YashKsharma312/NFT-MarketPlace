@@ -31,11 +31,11 @@ contract MRKTPLCE is ERC721 {
         require(msg.value >= PayAmount, "Not adequate ethers");
         payable(owner).transfer(msg.value);
         MarketItem[msg.sender]=id;
-        ArtPrice=price;
+        ArtPrice=price*10**18;
         }
     function buy(address  payable add,uint tag)public payable{
         _burn(tag);
-        require(msg.value >= ArtPrice, "Not adequate ethers");
+        require(msg.value == ArtPrice, "Not adequate ethers");
          bool sent=add.send(msg.value);
          require(sent,"transfer failed");
          _safeMint(msg.sender,tag);
