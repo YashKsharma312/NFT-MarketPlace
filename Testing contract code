@@ -39,6 +39,7 @@ describe("Marketplace Contract",function(){
         await contract.safeMint(addr1.address,1);
         await contract.approveNFT(1);
         await contract.connect(addr1).Market(1,5,{value:ethers.utils.parseEther("1")});
+        await contract.connect(addr1).approve(addr2.address,1);
         await contract.connect(addr2).buy(addr1.address,1,{value:ethers.utils.parseEther("5")});
         expect(await contract.balance(owner.address)).to.greaterThan(BigInt(10000000000000000000000));
         expect(await contract.balance(addr1.address)).to.greaterThan(BigInt(10000000000000000000000));
