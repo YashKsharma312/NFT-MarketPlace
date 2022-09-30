@@ -34,11 +34,10 @@ contract MRKTPLCE is ERC721 {
         ArtPrice=price*10**18;
         }
     function buy(address  payable add,uint tag)public payable{
-        _burn(tag);
         require(msg.value == ArtPrice, "Not adequate ethers");
          bool sent=add.send(msg.value);
          require(sent,"transfer failed");
-         _safeMint(msg.sender,tag);
+         transferFrom(add,msg.sender,tag);
          ApprovedNFT[tag]=false;
          cond=NFT.released;
     }
